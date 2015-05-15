@@ -3,7 +3,7 @@ import rachael
 import messageParser
 #The following is mostly for testing. We'll want to move it later down the road to a config file.
 
-nick = "rachael"
+user = host = server = real = "rachael"
 debug = False
 network = "192.168.156.64"
 port = 6667
@@ -13,34 +13,50 @@ def _restart(lib):
     print "Restarting!"
     reload(lib)
 
-if debug == True:
-    print "Testing"
-else:
+def _connect(username, hostname, servername, realname, network, port):
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     irc.connect((network,port))
-    irc.recv(4096)
-    irc.send('NICK ' + nick + '\r\n')
-    irc.send('USER racheal racheal racheal :racheal IRC\r\n')
-    bot1 = rachael.Rachael(debug, irc)
-    #bot1._join(chan)
+    irc.send('NICK ' + username + '\r\n')
+    irc.send('USER ' + username + ' ' + hostname + ' ' + servername + ' ' + ':' + realname + ' IRC\r\n')
+    return irc
+
+if debug:
+    print "Debugging!"
+
+else:
+    irc = _connect(user, host, server, real, network, port)
+    bot1 = rachael.Rachael(debug, irc, chan)
 
     sender = None
     message = None
+
     while True:
         data = irc.recv (4096)
-        if "376 rachael" in data or "422 rachael" in data:
-            bot1._join(chan)
-        elif data.find('PING') != -1: #If PING is Found in the Data
-            irc.send('PONG ' + data.split()[1] + '\r\n') #Send back a PONG
-        else:
-            sender = messageParser._getSender(data)
-            print data
-            message = messageParser._getMessage(data)
-            print "Sender: " + repr(sender)
-            print "Message: " + repr(message)
-            if "rachael: Restart" in message and sender is "sheuer":
-                irc.send('PRIVMSG #default :Restarting!\r\n')
-                _restart(rachael)
-                bot1 = rachael.Rachael(debug, irc)
-                irc.send('PRIVMSG #default :Restarted\r\n')
-            bot1.parse(sender, message)
+        dataline = data.splitlines()
+
+        for line in dataline:
+            print(line)
+            datasplit = line.split(' ')
+
+            if((datasplit[1] == "376") or (datasplit[1] == "422")):
+                bot1._join(chan)
+
+            elif "PING" == datasplit[0]: #If PING is Found in the Data
+                irc.send('PONG ' + line.split()[1] + '\r\n') #Send back a PONG
+
+            elif datasplit[1] == "PRIVMSG":
+                message = messageParser._getPrivmsg(line)
+                print message
+                if user + ": Restart" in message[2] and (message[0] == "sheuer" or message[0] == "masop"):
+                    try:
+                        irc.send('PRIVMSG #default :Restarting!\r\n')
+                        _restart(rachael)
+                        _restart(messageParser)
+                        bot1 = rachael.Rachael(debug, irc, chan)
+                        irc.send('PRIVMSG #default :Restarted\r\n')
+                    except Exception as errormsg:
+                        irc.send('PRIVMSG ' + chan + ' :' + "ERROR: " + str(errormsg) + '\r\n')
+                try:
+                    bot1.parse(message[0], message[2])
+                except Exception as errormsg:
+                    irc.send('PRIVMSG ' + chan + ' :' + "ERROR: " + str(errormsg) + '\r\n')
