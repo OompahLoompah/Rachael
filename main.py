@@ -1,6 +1,6 @@
 import socket
-import rachael
-import messageParser
+from  bots import rachael
+from modules import messageHandler
 #The following is mostly for testing. We'll want to move it later down the road to a config file.
 
 user = host = server = real = "rachael"
@@ -45,18 +45,25 @@ else:
                 irc.send('PONG ' + line.split()[1] + '\r\n') #Send back a PONG
 
             elif datasplit[1] == "PRIVMSG":
-                message = messageParser._getPrivmsg(line)
+                message = messageHandler._getPrivmsg(line)
                 print message
+
                 if user + ": Restart" in message[2] and (message[0] == "sheuer" or message[0] == "masop"):
+
                     try:
-                        irc.send('PRIVMSG #default :Restarting!\r\n')
+                        messageHandler._send('Restarting!', chan, irc)
                         _restart(rachael)
-                        _restart(messageParser)
+                        _restart(messageHandler)
                         bot1 = rachael.Rachael(debug, irc, chan)
-                        irc.send('PRIVMSG #default :Restarted\r\n')
+                        messageHandler._send('Restarted', chan, irc)
+
                     except Exception as errormsg:
-                        irc.send('PRIVMSG ' + chan + ' :' + "ERROR: " + str(errormsg) + '\r\n')
+                        irc.send(("ERROR: " + str(errormsg)), chan, irc)
+                        print(traceback.format_exc())
+
                 try:
                     bot1.parse(message[0], message[2])
+
                 except Exception as errormsg:
-                    irc.send('PRIVMSG ' + chan + ' :' + "ERROR: " + str(errormsg) + '\r\n')
+                    irc.send(("ERROR: " + str(errormsg)), chan, irc)
+                    print(traceback.format_exc())
