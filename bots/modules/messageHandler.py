@@ -1,6 +1,6 @@
 import re
 
-#return (sender, channel, message) tuple
+
 def _getPrivmsg(data):
     message = ''
     datasplit = data.split(' ')
@@ -20,6 +20,3 @@ def _getSender(data):
 def _getChannel(data):
     split = data.split(' ')
     return data[2]
-
-def _send(message, channel, irc):
-    irc.send('PRIVMSG ' + channel + ' :' + message + '\r\n')
