@@ -1,12 +1,12 @@
 import re
 
 
-def _getPrivmsg(data):
+def _getMessage(data):
     message = ''
     datasplit = data.split(' ')
     for i in range(3, len(datasplit)):
         message = message + ' ' + datasplit[i]
-    return(_getSender(data), datasplit[2], message[2:])
+    return(message[2:])
 
 def _getSender(data):
     split = re.split(' ', data)
@@ -19,4 +19,4 @@ def _getSender(data):
 
 def _getChannel(data):
     split = data.split(' ')
-    return data[2]
+    return split[2]

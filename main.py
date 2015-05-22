@@ -29,10 +29,10 @@ else:
     chanList = ["#default"]
     bot1 = rachael.Rachael(user, irc, chanList)
     botList = [bot1]
-    #bot1.run()
-    for bot in botList:
-        tmp = Thread(target = bot.run())
-        tmp.start()
-        time.sleep(100000)
+    bot1.run()
+    #for bot in botList:
+    #    tmp = Thread(target = bot.run())
+    #    tmp.start()
+    #    time.sleep(100000)
     while True:
         time.sleep(100000)

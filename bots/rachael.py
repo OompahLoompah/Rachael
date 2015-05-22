@@ -10,6 +10,6 @@ class Rachael(bot.bot):
         print "Sender: " + sender
         print "Message: " + message
         if self.hello.search(message) is not None:
-            self.irc.send('PRIVMSG ' + self.channel + ' :Hello\r\n')
+            self.irc.send('PRIVMSG ' + channel + ' :Hello\r\n')
         elif self.test.search(message) is not None:
-            self.irc.send('PRIVMSG ' + self.channel + ' :Indeed...\r\n')
+            self.irc.send('PRIVMSG ' + channel + ' :Indeed...\r\n')

@@ -21,14 +21,14 @@ class bot(object):
         self.irc.send('PRIVMSG ' + channel + ' :' + message + '\r\n')
 
     def pong(self, irc, line):
-        self.irc.send('PONG ' + line.split()[1] + '\r\n') #Send back a PONG
+        self.irc.send('PONG ' + line.split()[1] + '\r\n')
 
     def sortMessage(self, line):
         sender = messageHandler._getSender(line)
         channel = messageHandler._getChannel(line)
         message = messageHandler._getMessage(line)
 
-        if username + ": Restart" in message and (sender == "sheuer" or sender == "masop"):
+        if self.username + ": Restart" in message and (sender == "sheuer" or sender == "masop"):
             print "We would send a restart request here. This isn't implemented... yet."
         else:
             self.parse(sender, channel, message)
@@ -38,8 +38,11 @@ class bot(object):
 
     #This is where the real meat is. All bots should begin on this function after being init'ed.
     def run(self):
-
+        endloop = False
         while(True):
+            if endloop:
+                break
+            
             data = self.irc.recv (4096)
             print data
             datasplit = data.splitlines()
@@ -51,14 +54,14 @@ class bot(object):
                 elif((datasplit[1] == "376") or (datasplit[1] == "422")):
                     for chan in self.chanList:
                         self.join(chan)
-                    break
+                    endloop = True
 
         while(True):
             data = self.irc.recv (4096)
             datasplit = data.splitlines()
             print datasplit
 
-            for line in dataline:
+            for line in datasplit:
                 print(line)
                 datasplit = line.split()
 
