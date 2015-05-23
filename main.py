@@ -2,6 +2,7 @@ import socket
 import time
 from threading import Thread
 from bots import rachael
+from Queue import Queue
 
 #The following is mostly for testing. We'll want to move it later down the road to a config file.
 user = host = server = real = "rachael"
@@ -10,9 +11,24 @@ network = "192.168.156.64"
 port = 6667
 chan = "#default"
 
-def _restart(lib):
+#Soo.... yeah, this next part is really nasty code. I don't like it but it works.
+def setupBot(_module, library, user, host, server, real, network, port, chanList, irc = None, messageQueue = None):
+    if irc is None:
+        irc = connect(user, host, server, real, network, port)
+    chanList = ["#default"]
+    if messageQueue is None:
+        messageQueue = Queue(maxsize=0)
+    bot = _module
+    newBot = bot(user, irc, chanList, messageQueue)
+    newBot.begin()
+    return (botTuple)
+
+def _restart(botTuple): #botTuple is (bot class, library name, username, irc, chanList, messageQueue, thread, bot object)
     print "Restarting!"
-    reload(lib)
+    reload(botTuple[1])
+    bot = setupBot(botTuple)
+    print "Done restarting!"
+    return botTuple
 
 def connect(username, hostname, servername, realname, network, port):
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,14 +41,13 @@ if debug:
     print "Debugging!"
 
 else:
+    chanList = ["#default"]
+    bot = setupBot(rachael.Rachael, rachael, user, host, server, real, network, port, chanList)
+    botList = [bot]
+    print "started bot!"
+    print "starting loop"
     irc = connect(user, host, server, real, network, port)
     chanList = ["#default"]
-    bot1 = rachael.Rachael(user, irc, chanList)
-    botList = [bot1]
-    bot1.run()
-    #for bot in botList:
-    #    tmp = Thread(target = bot.run())
-    #    tmp.start()
-    #    time.sleep(100000)
-    while True:
-        time.sleep(100000)
+    bot = _module
+    newBot = bot(user, irc, chanList)
+    newBot.begin()
