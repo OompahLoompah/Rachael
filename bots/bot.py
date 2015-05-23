@@ -1,3 +1,4 @@
+import socket
 from modules import messageHandler
 from Queue import Queue
 
@@ -5,16 +6,39 @@ class bot(object):
 
     irc = None
     username = None
+    hostname = None
+    servername = None
+    realname = None
     chanList = None
     stopThread = True
     messageQueue = None
+    network = None
+    port = None
 
-    def __init__(self, username, irc, chanList, messageQueue):
+    def __init__(self, username, hostname, servername, realname, chanList, messageQueue, network, port):
         self.username = username
-        self.irc = irc
+        self.hostname = hostname
+        self.servername = servername
+        self.realname = realname
         self.chanList = chanList
         self.stopThread = False
         self.messageQueue = messageQueue
+        self.network = network
+        self.port = port
+
+    def connect(self):
+        irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        irc.connect((self.network, self.port))
+        irc.send('NICK ' + self.username + '\r\n')
+        irc.send('USER ' + self.username + ' ' + self.hostname + ' ' + self.servername + ' ' + ':' + self.realname + ' IRC\r\n')
+        self.irc = irc
+
+    def getIRC(self):
+        return self.irc
+
+    def setIRC(self, irc):
+        self.irc = irc
+
     def join(self, channel):
         self.irc.send('JOIN ' + channel + '\r\n')
         print "Joined " + channel
@@ -47,21 +71,25 @@ class bot(object):
 
     #This is where the real meat is. All bots should begin on this function after being init'ed.
     def begin(self):
-        while(not self.stopThread):
-            
-            data = self.irc.recv (4096)
-            print data
-            print "looking for connection"
-            datasplit = data.splitlines()
+        if self.irc is None:
+            self.connect()
+            while(not self.stopThread):
+                data = self.irc.recv (4096)
+                print data
+                print "looking for connection"
+                datasplit = data.splitlines()
 
-            for line in datasplit:
-                datasplit = line.split()
-                if datasplit[0] == "PING":
-                    self.pong(self.irc, line)
-                elif((datasplit[1] == "376") or (datasplit[1] == "422")):
-                    for chan in self.chanList:
-                        self.join(chan)
-                    self.run()
+                for line in datasplit:
+                    datasplit = line.split()
+                    if datasplit[0] == "PING":
+                        self.pong(self.irc, line)
+                    elif((datasplit[1] == "376") or (datasplit[1] == "422")):
+                        for chan in self.chanList:
+                            self.join(chan)
+                        self.run()
+        else:
+            print "You've done something weird. Running since we are already connected."
+            self.run()
 
     def run(self):
         while(not self.stopThread):

@@ -12,16 +12,13 @@ port = 6667
 chan = "#default"
 
 #Soo.... yeah, this next part is really nasty code. I don't like it but it works.
-def setupBot(_module, library, user, host, server, real, network, port, chanList, irc = None, messageQueue = None):
-    if irc is None:
-        irc = connect(user, host, server, real, network, port)
+def setupBot(_module, library, user, host, server, real, network, port, chanList):
     chanList = ["#default"]
-    if messageQueue is None:
-        messageQueue = Queue(maxsize=0)
+    messageQueue = Queue(maxsize=0)
     bot = _module
-    newBot = bot(user, irc, chanList, messageQueue)
+    newBot = bot(user, host, server, real, chanList, messageQueue, network, port)
     newBot.begin()
-    return (botTuple)
+    #return (botTuple)
 
 def _restart(botTuple): #botTuple is (bot class, library name, username, irc, chanList, messageQueue, thread, bot object)
     print "Restarting!"
@@ -30,24 +27,17 @@ def _restart(botTuple): #botTuple is (bot class, library name, username, irc, ch
     print "Done restarting!"
     return botTuple
 
-def connect(username, hostname, servername, realname, network, port):
-    irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    irc.connect((network, port))
-    irc.send('NICK ' + username + '\r\n')
-    irc.send('USER ' + username + ' ' + hostname + ' ' + servername + ' ' + ':' + realname + ' IRC\r\n')
-    return irc
-
 if debug:
     print "Debugging!"
 
 else:
     chanList = ["#default"]
     bot = setupBot(rachael.Rachael, rachael, user, host, server, real, network, port, chanList)
-    botList = [bot]
+    #botList = [bot]
     print "started bot!"
     print "starting loop"
-    irc = connect(user, host, server, real, network, port)
-    chanList = ["#default"]
-    bot = _module
-    newBot = bot(user, irc, chanList)
-    newBot.begin()
+    #irc = connect(user, host, server, real, network, port)
+    #chanList = ["#default"]
+    #bot = _module
+    #newBot = bot(user, irc, chanList)
+    #newBot.begin()
