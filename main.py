@@ -9,7 +9,8 @@ user = host = server = real = "rachael"
 debug = False
 network = "192.168.156.64"
 port = 6667
-chan = "#default"
+package = "rachael"
+directory = "bots"
 
 #Soo.... yeah, this next part is really nasty code. I don't like it but it works.
 def setupBot(_module, library, user, host, server, real, network, port, chanList):
@@ -33,11 +34,10 @@ if debug:
 else:
     chanList = ["#default"]
     bot = setupBot(rachael.Rachael, rachael, user, host, server, real, network, port, chanList)
-    #botList = [bot]
-    print "started bot!"
-    print "starting loop"
-    #irc = connect(user, host, server, real, network, port)
-    #chanList = ["#default"]
-    #bot = _module
-    #newBot = bot(user, irc, chanList)
-    #newBot.begin()
+    botList = [bot]
+    for bot in botList:
+        tmp = Thread(target = bot.begin)
+        tmp.start
+
+    while(True):
+        time.sleep(1)

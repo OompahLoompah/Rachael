@@ -54,6 +54,8 @@ class bot(object):
         for channel in self.chanList:
             self.send(channel, "Restarting!")
         print "requesting restart"
+        self.messageQueue.put("Restart")
+        self.stopThread = True
 
     def sortMessage(self, line):
         sender = messageHandler._getSender(line)
